@@ -6,63 +6,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles/reset.css" />
     <link rel="stylesheet" href="styles/index.css" />
-    <script defer src="index.js"></script>
+    <!-- use title component to name site-->
     <title>Brewery Tours</title>
   </head>
   <body>
+    <!-- create a class to contain the header text at top of the page -->
     <header class="main-header">
+      <!-- this is the section that contains the search text box and button -->
       <section class="select-state-section">
+        <!-- this is the text for the title -->
         <h2>Welcome to Brewery Tours</h2>
         <form id="select-state-form" autocomplete="off">
           <label for="select-state">Which state are you visiting?</label>
+          <!-- this is the list from which users can search -->
           <input id="select-state" name="select-state" type="text" />
+          <!-- this is the button to activate the search function by clicking the submit button -->
           <input type="submit" value="Search" />
         </form>
+        <!-- this is the end of the header section -->
       </section>
     </header>
     <main>
+      <!-- use an aside class to show the sidebar -->
       <aside class="filters-section">
         <aside class="filters-section">
+          <!-- use a h2 tag to display text on the search function -->
           <h2>Filter By:</h2>
+          <!-- use a form tag to implement the filtering -->
           <form id="filter-by-type-form" autocompete="off">
+            <!-- use a label to show the ref, and a h3 to show the text  -->
             <label for="filter-by-type"><h3>Type of Brewery</h3></label>
+            <!-- use id to reference the js and implement the filter-by-type const declared there -->
             <select name="filter-by-type" id="filter-by-type">
+              <!-- display the options available to select from, and text we wish to display by placing it in between 
+              the option tags -->
               <option value="">Select a type...</option>
               <option value="micro">Micro</option>
               <option value="regional">Regional</option>
               <option value="brewpub">Brewpub</option>
-              <option value="['brewpub', 'micro', 'regional]">All</option>
             </select>
           </form>
+        </aside>
+        <!-- use an aside class to implement the filter-section to select from search results -->
+        <aside class="filters-section">
+          <!-- generate a filtering section that will filter by cities made available after searching -->
           <div class="filter-by-city-heading">
             <h3>Cities</h3>
-
-            <!--this is the clear all button to the left of the screen-->
-            <button class="clear-all-button" onclick="clearAll()">clear all</button>
+            <!-- create a button and implement the clear-all-btn const to clear list -->
+            <button class="clear-all-btn">clear all</button>
           </div>
-
-          <!--still attempting to get this to work in js-->
           <form id="filter-by-city-form">
-            
+            <!--
+              For each city, generate a checkbox and label like below
+            -->
           </form>
         </aside>
       </aside>
-      <!--this is the menu to the left of the screen-->
+      <!-- use h1 to display list of breweries text -->
       <h1>List of Breweries</h1>
-      <form id="search-breweries-form" autocomplete="off">
-        <label for="search-breweries"><h2>Search breweries:</h2></label>
-        <input id="search-breweries" name="search-breweries" type="text" value="" oninput="searchFunction(event)"/>
-      </form>
+
+      <header class="search-bar">
+        <!-- use autocomplete to prevent search bar from implementing default features -->
+        <form id="search-breweries-form" autocomplete="off">
+          <!-- use h2 to displat text for searching breweries on page -->
+          <label for="search-breweries"><h2>Search breweries:</h2></label>
+          <input id="search-breweries" name="search-breweries" type="text" />
+        </form>
+      </header>
+
       <article>
+        <!-- use an unordered list to display search results as different points in search results -->
         <ul id="breweries-list" class="breweries-list">
           <!--
-          For each brewery returned in the search, 
-          add to the list using the HTML provided 
+          For each brewery returned in the search,
+          add to the list using the HTML provided
           in templates/standard-list-items.html
           -->
         </ul>
       </article>
     </main>
+    <!-- ref the index.js to display search results according to specs -->
+    <script src="index.js"></script>
   </body>
 </html>
-

@@ -1,201 +1,193 @@
-// use let to allow varible data entrys
-let dataImport = [];
-let state = [];
-let url = "";
-// specify the types of breweries permitted 
-let allowedTypes = ["micro", "regional", "brewpub"];
-let allowedCities = [];
-
-// make a const (addEventListeners) that uses querySelector, addEventListener 
-// make it responsive and link it with html via #select-state-form
-const addEventListeners = () => {
-  document
-  .querySelector("#select-state-form")
-  .addEventListener("submit", (event) => {
-// use preventDefault to stop default behaviour and implement lowercase when searching
+// declare consts that are needed in the following js.
+// use document.querySelector to ref the const required.
+const stateForm = document.querySelector("#select-state-form");
+const breweriesList = document.querySelector("#breweries-list");
+const filterByType = document.querySelector("#filter-by-type");
+const filterByName = document.querySelector("#search-breweries");
+const filterByCityForm = document.querySelector("#filter-by-city-form");
+const filterByCityClearBtn = document.querySelector(".clear-all-btn");
+// create a const that will differentiate between the different types of breweries.
+const state = {
+  types: ["micro", "regional", "brewpub"],
+  breweries: [],
+  filterByType: "",
+  filterByName: "",
+  filterByCities: [],
+};
+// add an eventListener for the submit button. Use preventDefault to stop the page from refreshing
+// and insted display the search results when the submit button is clicked.
+stateForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const stateName = document
-// use querySelector to refer to html and implement 
-  .querySelector("#select-state").value
-  .toLowerCase();
-  renderState(stateName);
+  const byState = event.target[0].value;
+  // use a fetch request to retrive the info from the api containing all the info
+  // on the breweries.
+  fetch(
+    `https://api.openbrewerydb.org/breweries?by_state=${byState}&per_page=50`
+  )
+    // this function runs the function passed into them, then displays
+    // once the fetched resource is loaded with a parameter.
+    .then((res) => res.json())
+    // use .then to show the data and filter by state.
+    .then((data) => {
+      state.breweries = data.filter((brewery) =>
+        // also display the type of brewery
+        state.types.includes(brewery.brewery_type)
+      );
+      // use render with an empty () to display result.
+      render();
+    });
 });
-// use queryselector to refer to index.html
-  document
-  .querySelector("#filter-by-type-form")
-  .addEventListener("change", (event) => {
-  allowedTypes = event.target.value;
-  });
-};
-// declare a const that will retrieve breweries in accordance with state entered
-const renderState = (stateName) => {
-  console.log(typeof stateName, typeof dataImport[0].state);
-  document.querySelector("#breweries-list").innerHTML = "";
+// make filterByTyoe responsive to click and allow it to change results
+// list by type.
+filterByType.addEventListener("change", (event) => {
+  state.filterByType = event.target.value;
 
-// use filter to import data that meets specified conditions
-  state = [...dataImport.filter((item) =>
-  item.state === stateName[0].toUpperCase() + stateName.slice(1).toLowerCase()
-  )];
-  for (brewery in state) {
-  createElements(state[brewery]);
-  }
-};
-// declare a const and use query selector to refer to html. create empty arrays for retrieved data to go into
-const renderCities = input  => {
-  document.querySelector("#filter-by-city-form").innerHTML = "";
-  let cities = [];
-// use a for loop to go through data and .push to enter data into array
-  for (let i = 0; i < input.length; i++) {
-  cities.push(input[i].city);
-  }
-// create an array containing cities retrieved in search
-  let uniqueCities = [...new Set(cities)];
-  for (let i = 0; i < uniqueCities.length; i++) {
-  createCityElements(uniqueCities[i]);
-  }
+  render();
+});
+
+filterByName.addEventListener("input", (event) => {
+  state.filterByName = event.target.value;
+
+  render();
+});
+
+filterByCityClearBtn.addEventListener("click", (event) => {
+  state.filterByCities = [];
+  filterByCityForm.reset();
+
+  render();
+});
+
+function render() {
+  renderBreweries();
+  renderCityFilters();
 }
-// declare a series of consts to contain retrieved elements(contact details etc)
-const createElements = (brewery) => {
-// log results of search
-  console.log(brewery);
-// create const referring to html and create a list with list items to hold varying details 
-// retrieved in search (links, address, contact info etc)
-  const list = document.querySelector("#breweries-list");
-  const listElement = document.createElement("li");
-// use appendchild to return updated data
-  list.appendChild(listElement);
-// create const for different elements returned after state search
-  const listH2 = document.createElement("h2");
-  const listDiv = document.createElement("div");
-  const addressSection = document.createElement("section");
-  const sectionPart1H3 = document.createElement("h3");
-  const sectionPart1P1 = document.createElement("p");
-  const sectionPart1P2 = document.createElement("p");
-  const sectionPart1P2Strong = document.createElement("strong");
-  sectionPart1P2.append(sectionPart1P2Strong);
-// allow changes to list items so that they arent just replicating the same info
-  addressSection.append(sectionPart1H3, sectionPart1P1, sectionPart1P2);
-// create consts to contain elements
-  const phoneSection = document.createElement("section");
-  const secondSecH3 = document.createElement("h3");
-  const secondSecParagraphOne = document.createElement("p");
-  phoneSection.append(secondSecH3, secondSecParagraphOne);
-  const sectionLink = document.createElement("section");
-  const section3Anchor = document.createElement("a");
-  sectionLink.append(section3Anchor);
-  listElement.append(listH2, listDiv, addressSection, phoneSection, sectionLink);
-// specify details that have to go into each list item in each different brewery
-  listH2.innerHTML = brewery.name;
-  listDiv.className = "type";
-  listDiv.innerHTML = brewery.brewery_type;
-// assign addressSection to contain address details, and set the text to appear above listed address
-  addressSection.className = "address";
-  sectionPart1H3.innerHTML = "Address:";
-  sectionPart1P1.innerHTML = brewery.street;
-  sectionPart1P2Strong.innerHTML = `${brewery.city}, ${brewery.postal_code}, ${brewery.state}`;
-// assign phoneSection to contain phone number details, and set the text to appear above contact number
-  phoneSection.className = "phone";
-  secondSecH3.innerHTML = "Phone:";
-  secondSecParagraphOne.innerHTML = brewery.phone;
-  sectionLink.className = "link";
-// set brewery website url to button
-  section3Anchor.setAttribute("href", brewery.website_url);
-  section3Anchor.setAttribute("target", "_blank");
-// set text for button containing link to website
-  section3Anchor.innerHTML = "Visit Website";
-};
 
-const init = () => {
-  console.log("starting");
-  addEventListeners();
-};
+function renderBreweries() {
+  breweriesList.innerHTML = "";
+  const breweries = applyFilters();
+  breweries.forEach(renderBreweryCard);
+}
 
-init();
+function renderCityFilters() {
+  const breweries = applyFilters();
+  // enable site to displat breweries by cities
+  const cities = [];
+  // If multiple breweries are in same city, display multiple results
+  // for each brewery.
+  breweries.forEach((brewery) => {
+    // if a single city contains multiple breweries display each of them
 
-// extension 1
-// Here i will attampt to implement functions for the first extension.
-// Declare const to target the data input and filter them through required specs.
-// render the data according to the new state declared.
-
-const searchFunction = (event) => {
-  let input = event.target.value.toLowerCase();
-  const newState = state.filter((item) =>
-  item.name.toLowerCase().includes(input)
-  );
-  renderState(newState);
-};
-
-// extension 2
-// here i will attempt to establish a filter by city section to the left of the screen
-// if an item in the dropdown menu is checked it will re-render the results list accordingly
-
-// declare a const for data input that will contain checkboxes and enable user to filter through 
-// declared variables
-const createCityElements = (input) => {
-  const cityListInput = document.createElement("input");
-  const cityListLabel = document.createElement("label");
-  cityListInput.setAttribute("type", "checkbox");
-  cityListInput.setAttribute("id", "filter-by-city-checkbox");
-  cityListInput.setAttribute("name", "city-checkbox");
-  cityListInput.setAttribute("value", input);
-  cityListInput.addEventListener("change", (event) => {
-    event.preventDefault();
-
-// if box is checked, changed results list accordingly
-    if (event.target.checked) {
-      let checkedCity = event.target.value.toLowerCase();
-      allowedCities.push(checkedCity);
+    if (!cities.includes(brewery.city)) {
+      // use .push to add them to the list of results as a separate result.
+      cities.push(brewery.city);
     }
-// if box is unchecked remove it from the results list
-    if (!event.target.checked) {
-      let unCheckedCity = event.target.value.toLowerCase();
-      allowedCities = allowedCities.filter((city) => city !== unCheckedCity);
-      if (!document.querySelector("#filter-by-city-checkbox").checked) {
-        fetchAndRender(url);
+  });
+
+  // This section is for the city filters
+  filterByCityForm.innerHTML = "";
+  cities.forEach((city) => {
+    const input = document.createElement("input");
+    // display individual characteristics for each brewery
+    // type, name, and city
+    input.setAttribute("type", "checkbox");
+    input.setAttribute("name", city);
+    input.setAttribute("value", city);
+    // if (state.filterByCities.includes(city)) {
+    //   input.setAttribute("checked", true)
+    // }
+    input.addEventListener("change", (event) => {
+      // if the box is checked then it will be passed into the filtering
+      if (event.target.checked) {
+        // when checked it will be added to the list
+        state.filterByCities.push(city);
+      } else {
+        // if it is unchecked it will be removed from the list
+        const foundCity = state.filterByCities.find(
+          // display the filtered cities
+          (filterCity) => filterCity === city
+        );
+        // use the splice method to change contents of the array with the new data
+        state.filterByCities.splice(state.filterByCities.indexOf(foundCity), 1);
       }
-    }
-    const newState = state.filter((item) =>
-      allowedCities.includes(item.city.toLowerCase())
-    );
-// display selected items in results list according to checklist
-    renderState(newState);
+      // create a new list of breweries according to filtering options
+      renderBreweries();
+    });
+    // create a label const to contain attributes
+    const label = document.createElement("label");
+    // use label to change the first attribute in the element.
+    label.setAttribute("for", city);
+    // use .innterText to change the label accordingly
+    label.innerText = city;
+
+    filterByCityForm.append(input, label);
   });
-
-  cityListLabel.setAttribute("for", "filter-by-city-checkbox");
-  cityListLabel.innerHTML = input;
-
-  document
-    .querySelector("#filter-by-city-form")
-    .append(cityListInput, cityListLabel);
-};
-// declare a clearAll function for the clear all button below left menu.
-
-const clearAll = () => {
-  document.querySelector("#filter-by-city-checkbox").checked = false;
-  allowedCities = [];
-  fetchAndRender(url);
 }
-
-// create a const to load filtered data to current display
-// use fetch to retrieve data from brewery database
-const loadDataToState = () => {
-  console.log("Loading data");
-// ive decided to limit the amount of results retrieved to 30 so that the inspect 
-// element of the page is easier to examine
-  for (let i = 1; i < 30; i++) {
-    fetch(`https://api.openbrewerydb.org/breweries?page=${i}`)
-    .then(function (response) {
-      return response.json();
-    })
-    // push the data and include the type of brewery, contact details
-    .then((breweries) => {
-      const importedData = [...breweries];
-      dataImport.push(...importedData.filter((item) =>
-      allowedTypes.includes(item.brewery_type)
-    ))
-    })
-
-}}
-
-loadDataToState()
-
+// apply filtering methods when selected.
+function applyFilters() {
+  let filteredBreweries = state.breweries;
+  // if filterbytype is not empty display according to type
+  if (state.filterByType !== "") {
+    filteredBreweries = filteredBreweries.filter(
+      (brewery) => brewery.brewery_type === state.filterByType
+    );
+  }
+  // if filtering section is not empty then filter by name
+  if (state.filterByName !== "") {
+    filteredBreweries = filteredBreweries.filter((brewery) =>
+      brewery.name.includes(state.filterByName)
+    );
+  }
+  // if list of results is greater that 0 display according to city
+  if (state.filterByCities.length !== 0) {
+    filteredBreweries = filteredBreweries.filter((brewery) =>
+      state.filterByCities.includes(brewery.city)
+    );
+  }
+  // return results list according to parameters met.
+  return filteredBreweries;
+}
+// this is to display the cards in which the search results are held.
+function renderBreweryCard(brewery) {
+  const li = document.createElement("li");
+  // display name of brewery
+  const h2 = document.createElement("h2");
+  h2.innerText = brewery.name;
+  // display brewery type
+  const div = document.createElement("div");
+  div.setAttribute("class", "type");
+  div.innerText = brewery.brewery_type;
+  // create a section to contain the address inclusive of; street,
+  // name this section 1 to contain relevant details.
+  const section1 = document.createElement("section");
+  section1.setAttribute("class", "address");
+  const h3address = document.createElement("h3");
+  h3address.innerText = "Address:";
+  const p1 = document.createElement("p");
+  p1.innerText = brewery.street;
+  const p2 = document.createElement("p");
+  p2.innerText = `${brewery.city}, ${brewery.postal_code}`;
+  section1.append(h3address, p1, p2);
+  // create a section to contain phone numbers retrieved from api
+  const section2 = document.createElement("section");
+  section2.setAttribute("class", "phone");
+  const h3phone = document.createElement("h3");
+  h3phone.innerText = "Phone:";
+  const p3 = document.createElement("p");
+  p3.innerText = brewery.phone;
+  section1.append(h3phone, p3);
+  // create a section =to contain the website to each brewery retrieved from api
+  const section3 = document.createElement("section");
+  section3.setAttribute("class", "link");
+  const link = document.createElement("a");
+  link.setAttribute("href", brewery.website_url);
+  link.setAttribute("target", "_blank");
+  // display text to appear next to the link to the brewery.
+  link.innerText = "Visit Website";
+  // use append to show link.
+  section3.append(link);
+  // use append to display different sections containing relevant info on each individual
+  // brewery. Make each list item change according to the brewery.
+  li.append(h2, div, section1, section2, section3);
+  breweriesList.append(li);
+}
